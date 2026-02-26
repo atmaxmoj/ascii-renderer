@@ -4,63 +4,63 @@ import { heading, p, esc, diagram } from '../utils.js';
 // Render Pipeline
 // ——————————————————————————————————————————————
 const pipelineArt = esc(
-`                     HTML/CSS (string)
-                          |
-                          v
-             +---------------------------+
-             |   Shadow DOM Injection    |
-             |   (innerHTML into host)   |
-             +---------------------------+
-                          |
-                          v
-             +---------------------------+
-             |   Browser Layout Engine   |
-             |   (native CSS compute)    |
-             +---------------------------+
-                          |
-                          v
-             +---------------------------+
-             |       DomWalker           |
-             |   getBoundingClientRect() |
-             |   getComputedStyle()      |
-             |   Builds LayoutNode tree  |
-             +---------------------------+
-                          |
-                          v
-             +---------------------------+
-             |    CoordinateMapper       |
-             |   pixel -> char grid      |
-             |   (cellWidth, cellHeight) |
-             +---------------------------+
-                          |
-                          v
-             +---------------------------+
-             |       Rasterizer          |
-             |   Draws ASCII chars into  |
-             |   CharGrid (2D buffer)    |
-             |   Stacking context order  |
-             +---------------------------+
-                          |
-                          v
-             +---------------------------+
-             |     OverlayManager        |
-             |   Paints popup layers     |
-             |   on top of CharGrid      |
-             +---------------------------+
-                          |
-                          v
-             +---------------------------+
-             |     CanvasDisplay         |
-             |   Renders CharGrid to     |
-             |   <canvas> element        |
-             +---------------------------+
-                          |
-                          v
-             +---------------------------+
-             |     TextExporter          |
-             |   Exports CharGrid to     |
-             |   plain text string       |
-             +---------------------------+`
+`    HTML/CSS (string)
+         |
+         v
++---------------------------+
+|   Shadow DOM Injection    |
+|   (innerHTML into host)   |
++---------------------------+
+         |
+         v
++---------------------------+
+|   Browser Layout Engine   |
+|   (native CSS compute)    |
++---------------------------+
+         |
+         v
++---------------------------+
+|       DomWalker           |
+|   getBoundingClientRect() |
+|   getComputedStyle()      |
+|   Builds LayoutNode tree  |
++---------------------------+
+         |
+         v
++---------------------------+
+|    CoordinateMapper       |
+|   pixel -> char grid      |
+|   (cellWidth, cellHeight) |
++---------------------------+
+         |
+         v
++---------------------------+
+|       Rasterizer          |
+|   Draws ASCII chars into  |
+|   CharGrid (2D buffer)    |
+|   Stacking context order  |
++---------------------------+
+         |
+         v
++---------------------------+
+|     OverlayManager        |
+|   Paints popup layers     |
+|   on top of CharGrid      |
++---------------------------+
+         |
+         v
++---------------------------+
+|     CanvasDisplay         |
+|   Renders CharGrid to     |
+|   <canvas> element        |
++---------------------------+
+         |
+         v
++---------------------------+
+|     TextExporter          |
+|   Exports CharGrid to     |
+|   plain text string       |
++---------------------------+`
 );
 
 const pipeline = `

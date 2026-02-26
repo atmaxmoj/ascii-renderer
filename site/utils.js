@@ -21,7 +21,7 @@ export function codeBlock(code) {
 
 /** Diagram block (pre-formatted ASCII art, already escaped) */
 export function diagram(escapedContent) {
-  return `<div style="display:flex; justify-content:center; margin:8px 0;"><pre style="white-space:pre; line-height:1;">${escapedContent}</pre></div>`;
+  return `<div style="text-align:center; margin:8px 0;"><pre style="white-space:pre; line-height:1; display:inline-block; text-align:left;">${escapedContent}</pre></div>`;
 }
 
 /** Side-by-side ASCII vs Native HTML comparison */
