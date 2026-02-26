@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Escape Overlay Test</title>
+  <style>
+    body { margin: 0; background: #1a1a1a; }
+    #target { width: 600px; height: 400px; }
+  </style>
+</head>
+<body>
+  <div id="target"></div>
+  <script type="module">
+    import { AsciiRenderer } from '/src/index.ts';
+
+    const renderer = new AsciiRenderer({
+      target: document.getElementById('target'),
+      cols: 60,
+      rows: 20,
+      fontSize: 14,
+    });
+
+    renderer.setContent(`
+      <div style="padding: 8px;">
+        <p id="ascii-text" style="margin: 4px 0;">ASCII paragraph above</p>
+        <div id="escaped-block" data-ascii-escape style="margin: 8px 0; padding: 8px; background: #222; border: 1px solid #555; border-radius: 6px; width: 300px;">
+          <p id="escaped-text" style="margin: 0 0 6px; color: #8cf;">Native escaped text</p>
+          <button id="escaped-btn" style="padding: 4px 12px; background: #2a6; color: #fff; border: none; border-radius: 4px; cursor: pointer;">Native Button</button>
+          <input id="escaped-input" type="text" value="Native input" style="padding: 4px 8px; background: #333; color: #eee; border: 1px solid #666; border-radius: 4px; width: 120px;">
+        </div>
+        <p id="ascii-below" style="margin: 4px 0;">ASCII paragraph below</p>
+      </div>
+    `);
+
+    window.__renderer = renderer;
+  </script>
+</body>
+</html>
