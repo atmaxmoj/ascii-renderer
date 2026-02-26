@@ -117,6 +117,16 @@ export class SelectionManager {
     this._isSelecting = false;
   }
 
+  /** Shift all selection row coordinates by a delta (used when viewport scrolls) */
+  shiftRows(delta: number): void {
+    if (this.anchor) this.anchor.row += delta;
+    if (this.head) this.head.row += delta;
+    if (this.anchorRange) {
+      this.anchorRange.startRow += delta;
+      this.anchorRange.endRow += delta;
+    }
+  }
+
   /** Clear the selection entirely */
   clearSelection(): void {
     this.anchor = null;

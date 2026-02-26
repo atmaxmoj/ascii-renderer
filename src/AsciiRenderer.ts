@@ -67,6 +67,7 @@ export class AsciiRenderer {
   // Viewport scroll state
   private scrollY: number = 0;
   private maxScrollY: number = 0;
+  private lastRenderScrollY: number = 0;
 
   // Range slider drag state
   private activeRangeInput: HTMLInputElement | null = null;
@@ -312,6 +313,7 @@ export class AsciiRenderer {
   setContent(html: string): void {
     this.currentHtml = html;
     this.scrollY = 0;
+    this.lastRenderScrollY = 0;
     const pixelWidth = this.layoutEngine.getPixelWidth(this.cols);
     const pixelHeight = this.layoutEngine.getPixelHeight(this.rows);
     this.layoutEngine.setContent(html, pixelWidth, pixelHeight);
@@ -364,6 +366,31 @@ export class AsciiRenderer {
   /** Get grid dimensions */
   getDimensions(): { cols: number; rows: number } {
     return { cols: this.cols, rows: this.rows };
+  }
+
+  /** Get the current viewport scroll position (character row) */
+  getScrollY(): number {
+    return this.scrollY;
+  }
+
+  /** Scroll the viewport to a character row */
+  scrollTo(row: number): void {
+    this.scrollY = Math.max(0, Math.min(this.maxScrollY, row));
+    this.scheduleRender();
+  }
+
+  /** Find the character row of an element by its id attribute. Returns -1 if not found. */
+  getElementRow(id: string): number {
+    if (!this.layoutTree) return -1;
+    const find = (node: LayoutNode): number => {
+      if (node.element?.id === id) return node.charRect.row;
+      for (const child of node.children) {
+        const r = find(child);
+        if (r >= 0) return r;
+      }
+      return -1;
+    };
+    return find(this.layoutTree);
   }
 
   /** Update theme */
@@ -600,6 +627,13 @@ export class AsciiRenderer {
 
     // Draw text input cursor if active
     this.drawTextCursor();
+
+    // Shift selection to follow viewport scroll
+    const scrollDelta = this.scrollY - this.lastRenderScrollY;
+    if (scrollDelta !== 0) {
+      this.eventManager.getSelectionManager().shiftRows(-scrollDelta);
+      this.lastRenderScrollY = this.scrollY;
+    }
 
     // Draw selection highlight
     this.drawSelection();
