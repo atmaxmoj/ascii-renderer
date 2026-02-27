@@ -149,7 +149,7 @@ export class CanvasDisplay {
     if (cell.char !== ' ') {
       const glyph = this.getGlyph(cell.char, cell.fg, cell.bold, cell.italic, isWideLead);
       if (glyph) {
-        this.ctx.drawImage(glyph, x, y);
+        this.ctx.drawImage(glyph, x, y, drawWidth, this.cellHeight);
       } else {
         // Fallback: direct fillText
         this.setFont(cell.bold, cell.italic);

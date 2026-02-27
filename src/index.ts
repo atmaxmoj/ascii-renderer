@@ -22,3 +22,7 @@ export { CoordinateMapper } from './layout/CoordinateMapper.js';
 export { HitTestBuffer } from './events/HitTestBuffer.js';
 export { SelectionManager } from './events/SelectionManager.js';
 export type { SelectionMode, SelectionGranularity } from './events/SelectionManager.js';
+
+// Mermaid support
+export { mermaidToHtml, preprocessMermaid } from './mermaid/index.js';
+export type { FlowchartDef, SequenceDef, MermaidDef } from './mermaid/index.js';

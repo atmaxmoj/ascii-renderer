@@ -56,6 +56,7 @@ export interface ComputedStyleInfo {
   borderRightColor: string;
   borderBottomColor: string;
   borderLeftColor: string;
+  flexDirection: string;
   cursor: string;
   whiteSpace: string;
   textOverflow: string;

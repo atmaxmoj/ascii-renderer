@@ -165,7 +165,8 @@ export class Rasterizer {
     // Expand bordered non-table elements that are too short for their text
     // Only shift subsequent siblings vertically for block/vertical flow layouts,
     // not for flex-row layouts where children are arranged horizontally.
-    const isHorizontalLayout = node.style?.display === 'flex' || node.style?.display === 'inline-flex';
+    const isFlex = node.style?.display === 'flex' || node.style?.display === 'inline-flex';
+    const isHorizontalLayout = isFlex && node.style?.flexDirection !== 'column';
     let rowShift = 0;
     for (let i = 0; i < node.children.length; i++) {
       const child = node.children[i];
@@ -200,6 +201,11 @@ export class Rasterizer {
           }
           currentRow += child.charRect.height;
         }
+      }
+      // Update container height to contain all rows
+      const totalHeight = currentRow - node.charRect.row;
+      if (totalHeight > node.charRect.height) {
+        node.charRect.height = totalHeight;
       }
     }
   }
@@ -278,17 +284,15 @@ export class Rasterizer {
 
     if (node.children.length === 0) return;
 
+    // Skip table cells (height handled by adjustMinHeights)
+    if (['td', 'th'].includes(node.tagName)) return;
+
     const { style } = node;
     const hasBorderBottom = style.borderBottomStyle !== 'none' && parseFloat(style.borderBottomWidth) > 0;
-    const hasBorderTop = style.borderTopStyle !== 'none' && parseFloat(style.borderTopWidth) > 0;
-    if (!hasBorderTop && !hasBorderBottom) return;
-
-    // Skip table elements (handled separately)
-    if (['table', 'tbody', 'thead', 'tfoot', 'tr', 'td', 'th'].includes(node.tagName)) return;
 
     // Find the maximum bottom edge across all descendants
     const maxBottom = this.deepestChildBottom(node);
-    // Needed height: children extent + bottom border row
+    // Needed height: children extent + bottom border row (if bordered)
     const neededHeight = maxBottom - node.charRect.row + (hasBorderBottom ? 1 : 0);
 
     if (neededHeight > node.charRect.height) {
@@ -299,7 +303,10 @@ export class Rasterizer {
       if (node.parent) {
         const siblings = node.parent.children;
         const idx = siblings.indexOf(node);
-        const isHoriz = node.parent.style?.display === 'flex' || node.parent.style?.display === 'inline-flex';
+        const parentDisplay = node.parent.style?.display;
+        const isFlex = parentDisplay === 'flex' || parentDisplay === 'inline-flex';
+        const isHoriz = (isFlex && node.parent.style?.flexDirection !== 'column')
+          || node.parent.tagName === 'tr';
         if (idx >= 0 && !isHoriz) {
           for (let i = idx + 1; i < siblings.length; i++) {
             this.shiftNodeVertical(siblings[i], delta);
@@ -453,6 +460,20 @@ export class Rasterizer {
     // Render borders (skip for table cells — table draws unified borders)
     const isTableCell = node.tagName === 'td' || node.tagName === 'th';
     if (!isTableCell) {
+      // Clear interior of bordered elements to prevent stray characters
+      // from earlier-painted siblings (e.g. table borders bleeding through)
+      const hasAnyBorder =
+        this.hasBorder(style.borderTopStyle, style.borderTopWidth) ||
+        this.hasBorder(style.borderRightStyle, style.borderRightWidth) ||
+        this.hasBorder(style.borderBottomStyle, style.borderBottomWidth) ||
+        this.hasBorder(style.borderLeftStyle, style.borderLeftWidth);
+      if (hasAnyBorder && charRect.width > 2 && charRect.height > 2) {
+        for (let r = charRect.row + 1; r < charRect.row + charRect.height - 1; r++) {
+          for (let c = charRect.col + 1; c < charRect.col + charRect.width - 1; c++) {
+            grid.set(c, r, { char: ' ', elementId: node.id });
+          }
+        }
+      }
       this.boxRenderer.render(node, grid);
     }
 

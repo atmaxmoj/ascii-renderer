@@ -18,7 +18,7 @@ function mockStyle(overrides: Partial<ComputedStyleInfo> = {}): ComputedStyleInf
     borderBottomWidth: '0px', borderLeftWidth: '0px',
     borderTopColor: '#666', borderRightColor: '#666',
     borderBottomColor: '#666', borderLeftColor: '#666',
-    cursor: 'default', whiteSpace: 'normal', textOverflow: 'clip',
+    flexDirection: 'row', cursor: 'default', whiteSpace: 'normal', textOverflow: 'clip',
     ...overrides,
   };
 }

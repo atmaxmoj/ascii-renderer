@@ -1,297 +1,158 @@
-import { heading, p, esc, diagram } from '../utils.js';
+import { heading, p } from '../utils.js';
 
 // ——————————————————————————————————————————————
 // 1. Initialization
 // ——————————————————————————————————————————————
-const initArt = esc(
-`User          AsciiRenderer     CanvasDisplay     ShadowDomHost     CoordMapper
- |                 |                 |                  |                |
- | new(container,  |                 |                  |                |
- |     options)    |                 |                  |                |
- |---------------->|                 |                  |                |
- |                 |                 |                  |                |
- |                 | new(container,  |                  |                |
- |                 |     font, dpr)  |                  |                |
- |                 |---------------->|                  |                |
- |                 |                 |                  |                |
- |                 |                 | create <canvas>  |                |
- |                 |                 | set width/height |                |
- |                 |                 | apply DPI scale  |                |
- |                 |                 | set font         |                |
- |                 |                 |                  |                |
- |                 |                 | measureCellSize()|                |
- |                 |                 | ctx.measureText  |                |
- |                 |                 | ("M") -> width   |                |
- |                 |                 | lineHeight calc  |                |
- |                 |                 |   -> height      |                |
- |                 |                 |                  |                |
- |                 | (cellW, cellH)  |                  |                |
- |                 |<----------------|                  |                |
- |                 |                 |                  |                |
- |                 | new(cellW, cellH)                  |                |
- |                 |----------------------------------------------->---|
- |                 |                 |                  |                |
- |                 | new()           |                  |                |
- |                 |--------------------------------->|                |
- |                 |                 |                  |                |
- |                 |                 |                  | create hidden  |
- |                 |                 |                  | <div>          |
- |                 |                 |                  | attachShadow() |
- |                 |                 |                  |                |
- |                 | create CharGrid, HitTestBuffer    |                |
- |                 | create Rasterizer, OverlayMgr     |                |
- |                 | create EventDispatcher, Exporter   |                |
- |                 |                 |                  |                |
- |                 | attach event listeners to canvas   |                |
- |                 |                 |                  |                |
- | <instance>      |                 |                  |                |
- |<----------------|                 |                  |                |
- |                 |                 |                  |                |`
-);
+const initDiagram = `<div data-mermaid>sequenceDiagram
+    participant User as "User"
+    participant AR as "AsciiRenderer"
+    participant CD as "CanvasDisplay"
+    participant SDH as "ShadowDomHost"
+    participant CM as "CoordMapper"
+    User->>AR: new(container, options)
+    AR->>CD: new(container, font, dpr)
+    CD->>CD: create canvas, set font
+    CD->>CD: measureCellSize()
+    CD-->>AR: (cellW, cellH)
+    AR->>CM: new(cellW, cellH)
+    AR->>SDH: new()
+    SDH->>SDH: create hidden div, attachShadow()
+    AR->>AR: create CharGrid, HitTestBuffer
+    AR->>AR: create Rasterizer, OverlayMgr
+    AR-->>User: instance
+</div>`;
 
 // ——————————————————————————————————————————————
 // 2. Render
 // ——————————————————————————————————————————————
-const renderArt = esc(
-`User       AsciiRenderer   ShadowDomHost   DomWalker   CoordMapper   Rasterizer   OverlayMgr   CanvasDisp
- |              |               |              |             |             |             |            |
- | setContent   |               |              |             |             |             |            |
- | (html, css)  |               |              |             |             |             |            |
- |------------->|               |              |             |             |             |            |
- |              |               |              |             |             |             |            |
- |              | inject(html)  |              |             |             |             |            |
- |              |-------------->|              |             |             |             |            |
- |              |               | innerHTML =  |             |             |             |            |
- |              |               | html         |             |             |             |            |
- |              |               | force reflow |             |             |             |            |
- |              |               |              |             |             |             |            |
- |              | walk(root)    |              |             |             |             |            |
- |              |-------------------------->|             |             |             |            |
- |              |               |              | for each    |             |             |            |
- |              |               |              | element:    |             |             |            |
- |              |               |              | getRect()   |             |             |            |
- |              |               |              | getStyle()  |             |             |            |
- |              |               |              | pxToGrid()  |             |             |            |
- |              |               |              |------------>|             |             |            |
- |              |               |              | GridRect    |             |             |            |
- |              |               |              |<------------|             |             |            |
- |              |               |              | build tree  |             |             |            |
- |              |               |              |             |             |             |            |
- |              | layoutTree    |              |             |             |             |            |
- |              |<--------------------------|             |             |             |            |
- |              |               |              |             |             |             |            |
- |              | grid.clear()  |              |             |             |             |            |
- |              | hitTest.clear()              |             |             |             |            |
- |              |               |              |             |             |             |            |
- |              | rasterize(tree, grid, hitTest)              |             |             |            |
- |              |------------------------------------------->|             |             |            |
- |              |               |              |             | sort stacking|             |            |
- |              |               |              |             | write chars  |             |            |
- |              |               |              |             |             |             |            |
- |              | paintOverlays(grid, hitTest)  |             |             |             |            |
- |              |------------------------------------------------------------>|            |
- |              |               |              |             |             |             |            |
- |              | render(grid)  |              |             |             |             |            |
- |              |------------------------------------------------------------------------>|
- |              |               |              |             |             |  fillText()  |            |
- |              |               |              |             |             |  per cell    |            |
- |              |               |              |             |             |             |            |
- | <done>       |               |              |             |             |             |            |
- |<-------------|               |              |             |             |             |            |`
-);
+const renderDiagram = `<div data-mermaid>sequenceDiagram
+    participant User as "User"
+    participant AR as "AsciiRenderer"
+    participant SDH as "ShadowDomHost"
+    participant DW as "DomWalker"
+    participant Rast as "Rasterizer"
+    participant CD as "CanvasDisplay"
+    User->>AR: setContent(html)
+    AR->>SDH: inject(html)
+    SDH->>SDH: innerHTML = html, force reflow
+    AR->>DW: walk(root)
+    DW->>DW: for each element: getRect, getStyle, pxToGrid
+    DW-->>AR: layoutTree
+    AR->>AR: grid.clear(), hitTest.clear()
+    AR->>Rast: rasterize(tree, grid, hitTest)
+    Rast->>Rast: sort stacking, write chars
+    AR->>CD: render(grid)
+    CD->>CD: fillText() per cell
+    AR-->>User: done
+</div>`;
 
 // ——————————————————————————————————————————————
 // 3. Click
 // ——————————————————————————————————————————————
-const clickArt = esc(
-`Browser      CanvasDisplay   EventDispatcher   CoordMapper   HitTestBuffer   OverlayMgr   Target
- |                |                |               |              |              |            |
- | mousedown      |                |               |              |              |            |
- | (px: 245,118)  |                |               |              |              |            |
- |--------------->|                |               |              |              |            |
- |                | onMouseDown    |               |              |              |            |
- |                |--------------->|               |              |              |            |
- |                |                |               |              |              |            |
- |                |                | pxToCol(245)  |              |              |            |
- |                |                | pxToRow(118)  |              |              |            |
- |                |                |-------------->|              |              |            |
- |                |                | col=28, row=8 |              |              |            |
- |                |                |<--------------|              |              |            |
- |                |                |               |              |              |            |
- |                |                | hasOverlay()? |              |              |            |
- |                |                |------------------------------------------>|            |
- |                |                | no            |              |              |            |
- |                |                |<------------------------------------------|            |
- |                |                |               |              |              |            |
- |                |                | get(28, 8)    |              |              |            |
- |                |                |----------------------------->|              |            |
- |                |                | <button>      |              |              |            |
- |                |                |<-----------------------------|              |            |
- |                |                |               |              |              |            |
- |                |                | update focus  |              |              |            |
- |                |                | set cursor    |              |              |            |
- |                |                | dispatch      |              |              |            |
- |                |                | "click"       |              |              |            |
- |                |                |-------------------------------------------------------->|
- |                |                |               |              |              | handler    |
- |                |                |               |              |              | runs       |
- |                |                |               |              |              |            |`
-);
+const clickDiagram = `<div data-mermaid>sequenceDiagram
+    participant Browser as "Browser"
+    participant CD as "CanvasDisplay"
+    participant ED as "EventDispatcher"
+    participant HT as "HitTestBuffer"
+    participant Target as "Target"
+    Browser->>CD: mousedown(px: 245,118)
+    CD->>ED: onMouseDown
+    ED->>ED: pxToCol(245), pxToRow(118)
+    ED->>HT: get(col=28, row=8)
+    HT-->>ED: button element
+    ED->>ED: update focus, set cursor
+    ED->>Target: dispatch "click"
+</div>`;
 
 // ——————————————————————————————————————————————
 // 4. Text Input & IME
 // ——————————————————————————————————————————————
-const inputArt = esc(
-`User       CanvasDisplay   EventDispatcher   HiddenTextarea   ShadowInput   Renderer
- |              |                |                |               |             |
- | click input  |                |                |               |             |
- |------------->|                |                |               |             |
- |              | mousedown      |                |               |             |
- |              |--------------->|                |               |             |
- |              |                | hit-test ->    |               |             |
- |              |                | <input>        |               |             |
- |              |                | setFocus()     |               |             |
- |              |                | show hidden    |               |             |
- |              |                | textarea       |               |             |
- |              |                |--------------->|               |             |
- |              |                |                | .focus()      |             |
- |              |                |                | .value = val  |             |
- |              |                |                |               |             |
- | types "h"    |                |                |               |             |
- |-------------------------------------->|               |             |
- |              |                |                | "input" event |             |
- |              |                |<---------------|               |             |
- |              |                | sync value     |               |             |
- |              |                |------------------------------>|             |
- |              |                | re-render      |               |             |
- |              |                |------------------------------------------->|
- |              |                |                |               |             |
- | IME compose  |                |                |               |             |
- |-------------------------------------->|               |             |
- |              |                |                | composition   |             |
- |              |                |                | start         |             |
- |              |                |<---------------|               |             |
- |              |                | composing=true |               |             |
- |              |                |                |               |             |
- | intermediate |                |                |               |             |
- |-------------------------------------->|               |             |
- |              |                |                | composition   |             |
- |              |                |<---------------| update        |             |
- |              |                | render with    |               |             |
- |              |                | underline      |               |             |
- |              |                |------------------------------------------->|
- |              |                |                |               |             |
- | commit       |                |                |               |             |
- |-------------------------------------->|               |             |
- |              |                |                | composition   |             |
- |              |                |<---------------| end           |             |
- |              |                | composing=false|               |             |
- |              |                | sync final val |               |             |
- |              |                |------------------------------>|             |
- |              |                | re-render      |               |             |
- |              |                |------------------------------------------->|`
-);
+const inputDiagram = `<div data-mermaid>sequenceDiagram
+    participant User as "User"
+    participant ED as "EventDispatcher"
+    participant HT as "HiddenTextarea"
+    participant SI as "ShadowInput"
+    participant R as "Renderer"
+    User->>ED: click input
+    ED->>ED: hit-test -> input, setFocus()
+    ED->>HT: show hidden textarea, .focus()
+    User->>HT: types "h"
+    HT->>ED: "input" event
+    ED->>SI: sync value
+    ED->>R: re-render
+    User->>HT: IME compose
+    HT->>ED: compositionstart
+    ED->>ED: composing=true
+    User->>HT: intermediate
+    HT->>ED: compositionupdate
+    ED->>R: render with underline
+    User->>HT: commit
+    HT->>ED: compositionend
+    ED->>SI: sync final value
+    ED->>R: re-render
+</div>`;
 
 // ——————————————————————————————————————————————
 // 5. Scroll
 // ——————————————————————————————————————————————
-const scrollArt = esc(
-`Browser    CanvasDisplay   EventDispatcher   CoordMapper   HitTestBuffer   ScrollState   Renderer
- |              |                |               |              |              |             |
- | wheel event  |                |               |              |              |             |
- | (deltaY:120) |                |               |              |              |             |
- | at (300,200) |                |               |              |              |             |
- |------------->|                |               |              |              |             |
- |              | onWheel        |               |              |              |             |
- |              |--------------->|               |              |              |             |
- |              |                | pxToCol(300)  |              |              |             |
- |              |                | pxToRow(200)  |              |              |             |
- |              |                |-------------->|              |              |             |
- |              |                | col=34,row=14 |              |              |             |
- |              |                |<--------------|              |              |             |
- |              |                |               |              |              |             |
- |              |                | get(34,14)    |              |              |             |
- |              |                |----------------------------->|              |             |
- |              |                | <div.scroll>  |              |              |             |
- |              |                |<-----------------------------|              |             |
- |              |                |               |              |              |             |
- |              |                | find scrollable ancestor     |              |             |
- |              |                | deltaY -> char rows (~3)    |              |             |
- |              |                |               |              |              |             |
- |              |                | getScrollState|              |              |             |
- |              |                |------------------------------------------>|             |
- |              |                | {top:0,max:50}|              |              |             |
- |              |                |<------------------------------------------|             |
- |              |                |               |              |              |             |
- |              |                | clamp(0+3, 0, 50) = 3       |              |             |
- |              |                | setScrollState(el, 3)       |              |             |
- |              |                |------------------------------------------>|             |
- |              |                |               |              |              |             |
- |              |                | re-render     |              |              |             |
- |              |                |-------------------------------------------------------->|`
-);
+const scrollDiagram = `<div data-mermaid>sequenceDiagram
+    participant Browser as "Browser"
+    participant CD as "CanvasDisplay"
+    participant ED as "EventDispatcher"
+    participant HT as "HitTestBuffer"
+    participant SS as "ScrollState"
+    participant R as "Renderer"
+    Browser->>CD: wheel(deltaY:120)
+    CD->>ED: onWheel
+    ED->>ED: pxToCol/Row
+    ED->>HT: get(col,row)
+    HT-->>ED: scrollable element
+    ED->>SS: getScrollState
+    SS-->>ED: top:0, max:50
+    ED->>ED: clamp(0+3, 0, 50) = 3
+    ED->>SS: setScrollState(el, 3)
+    ED->>R: re-render
+</div>`;
 
 // ——————————————————————————————————————————————
 // 6. Drag
 // ——————————————————————————————————————————————
-const dragArt = esc(
-`User       CanvasDisplay   EventDispatcher   CoordMapper   HitTestBuffer   DragState   Renderer
- |              |                |               |              |             |            |
- | mousedown    |                |               |              |             |            |
- | at (120,40)  |                |               |              |             |            |
- |------------->|                |               |              |             |            |
- |              | onMouseDown    |               |              |             |            |
- |              |--------------->|               |              |             |            |
- |              |                | pxToCol/Row   |              |             |            |
- |              |                |-------------->|              |             |            |
- |              |                | col=14,row=3  |              |             |            |
- |              |                |<--------------|              |             |            |
- |              |                | get(14,3)     |              |             |            |
- |              |                |----------------------------->|             |            |
- |              |                | <div.handle>  |              |             |            |
- |              |                |<-----------------------------|             |            |
- |              |                |               |              |             |            |
- |              |                | check draggable              |             |            |
- |              |                | initDrag(el, col=14, row=3)  |             |            |
- |              |                |----------------------------------------->|            |
- |              |                | dispatch "dragstart"         |             |            |
- |              |                | set cursor = "grabbing"      |             |            |
- |              |                |               |              |             |            |
- | mousemove    |                |               |              |             |            |
- | at (180,70)  |                |               |              |             |            |
- |------------->|                |               |              |             |            |
- |              | onMouseMove    |               |              |             |            |
- |              |--------------->|               |              |             |            |
- |              |                | isDragging?   |              |             |            |
- |              |                |----------------------------------------->|            |
- |              |                | yes           |              |             |            |
- |              |                |<-----------------------------------------|            |
- |              |                | pxToCol/Row -> col=21,row=5  |             |            |
- |              |                | delta: col=7, row=2          |             |            |
- |              |                | dispatch "drag" + re-render  |             |            |
- |              |                |------------------------------------------------------->|
- |              |                |               |              |             |            |
- | mouseup      |                |               |              |             |            |
- |------------->|                |               |              |             |            |
- |              | onMouseUp      |               |              |             |            |
- |              |--------------->|               |              |             |            |
- |              |                | finalizeDrag()|              |             |            |
- |              |                |----------------------------------------->|            |
- |              |                | dispatch "dragend"           |             |            |
- |              |                | cursor = "default"           |             |            |
- |              |                | re-render     |              |             |            |
- |              |                |------------------------------------------------------->|`
-);
+const dragDiagram = `<div data-mermaid>sequenceDiagram
+    participant User as "User"
+    participant CD as "CanvasDisplay"
+    participant ED as "EventDispatcher"
+    participant HT as "HitTestBuffer"
+    participant DS as "DragState"
+    participant R as "Renderer"
+    User->>CD: mousedown(120,40)
+    CD->>ED: onMouseDown
+    ED->>ED: pxToCol/Row
+    ED->>HT: get(14,3)
+    HT-->>ED: draggable element
+    ED->>DS: initDrag(el, 14, 3)
+    ED->>ED: dispatch "dragstart"
+    User->>CD: mousemove(180,70)
+    CD->>ED: onMouseMove
+    ED->>DS: isDragging? yes
+    ED->>ED: delta: col=7, row=2
+    ED->>R: dispatch "drag" + re-render
+    User->>CD: mouseup
+    CD->>ED: onMouseUp
+    ED->>DS: finalizeDrag()
+    ED->>R: dispatch "dragend" + re-render
+</div>`;
 
 export const sequences = [
-  { title: 'Sequence: Initialization',    id: 'sec-seq-init',   desc: 'When <code style="color:#79c0ff;">new AsciiRenderer(container, options)</code> is called:', art: initArt },
-  { title: 'Sequence: Render',            id: 'sec-seq-render', desc: 'When <code style="color:#79c0ff;">renderer.setContent(html)</code> is called:',              art: renderArt },
-  { title: 'Sequence: Click Interaction', id: 'sec-seq-click',  desc: 'User clicks on a rendered button in the ASCII canvas:',                                     art: clickArt },
-  { title: 'Sequence: Text Input & IME',  id: 'sec-seq-input',  desc: 'User focuses an input field and types, including IME composition:',                         art: inputArt },
-  { title: 'Sequence: Scroll',            id: 'sec-seq-scroll', desc: 'User scrolls a container with <code style="color:#79c0ff;">overflow: auto</code>:',         art: scrollArt },
-  { title: 'Sequence: Drag',              id: 'sec-seq-drag',   desc: 'User drags a draggable element:',                                                           art: dragArt },
+  { title: 'Sequence: Initialization',    id: 'sec-seq-init',   desc: 'When <code style="color:#79c0ff;">new AsciiRenderer(container, options)</code> is called:', diagram: initDiagram },
+  { title: 'Sequence: Render',            id: 'sec-seq-render', desc: 'When <code style="color:#79c0ff;">renderer.setContent(html)</code> is called:',              diagram: renderDiagram },
+  { title: 'Sequence: Click Interaction', id: 'sec-seq-click',  desc: 'User clicks on a rendered button in the ASCII canvas:',                                     diagram: clickDiagram },
+  { title: 'Sequence: Text Input & IME',  id: 'sec-seq-input',  desc: 'User focuses an input field and types, including IME composition:',                         diagram: inputDiagram },
+  { title: 'Sequence: Scroll',            id: 'sec-seq-scroll', desc: 'User scrolls a container with <code style="color:#79c0ff;">overflow: auto</code>:',         diagram: scrollDiagram },
+  { title: 'Sequence: Drag',              id: 'sec-seq-drag',   desc: 'User drags a draggable element:',                                                           diagram: dragDiagram },
 ].map(s => `
   ${heading(s.title, s.id)}
   ${p(s.desc)}
-  ${diagram(s.art)}
+  <div style="margin:8px 0;">
+    ${s.diagram}
+  </div>
 `).join('');

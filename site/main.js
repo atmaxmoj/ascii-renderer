@@ -6,6 +6,9 @@ import { sequences } from './content/sequences.js';
 import { examples } from './content/examples.js';
 import { buildSidebar, navItems } from './content/sidebar.js';
 
+// Wait for JetBrains Mono to load before measuring character cells
+await document.fonts.ready;
+
 const theme = { fg: '#c9d1d9', bg: '#0d1117', border: '#30363d' };
 
 // ——— Sidebar renderer (fixed, no scroll) ———
@@ -47,6 +50,7 @@ ${styles}
 </div>`;
 
 main.setContent(content);
+window.__main = main;
 
 // ——— Collect all section IDs for scroll tracking ———
 const allTargets = navItems.flatMap(g => g.items.map(i => i.target));

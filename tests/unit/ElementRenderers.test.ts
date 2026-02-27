@@ -29,7 +29,7 @@ function mockNode(overrides: Partial<LayoutNode> & { tagName: string }): LayoutN
     borderTopWidth: '0px', borderRightWidth: '0px',
     borderBottomWidth: '0px', borderLeftWidth: '0px',
     borderTopColor: '', borderRightColor: '', borderBottomColor: '',
-    borderLeftColor: '', cursor: 'default', whiteSpace: 'normal',
+    borderLeftColor: '', flexDirection: 'row', cursor: 'default', whiteSpace: 'normal',
     textOverflow: 'clip',
   };
 

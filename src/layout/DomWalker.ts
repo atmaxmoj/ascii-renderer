@@ -70,6 +70,13 @@ export class DomWalker {
       return node;
     }
 
+    // Select elements: treat as leaf — option children are handled by ElementRenderers
+    const tag = node.tagName;
+    if (tag === 'select') {
+      node.textContent = this.getDirectTextContent(element, styleInfo.whiteSpace);
+      return node;
+    }
+
     const hasElementChildren = element.children.length > 0;
 
     if (hasElementChildren) {
@@ -90,7 +97,7 @@ export class DomWalker {
       // textContent stays null — text is handled by child text nodes
     } else {
       // Leaf element: use direct text content as before
-      node.textContent = this.getDirectTextContent(element);
+      node.textContent = this.getDirectTextContent(element, styleInfo.whiteSpace);
       // No children to walk
     }
 
@@ -142,13 +149,17 @@ export class DomWalker {
   }
 
   /** Get only direct text content (not from children) — for leaf elements */
-  private getDirectTextContent(element: Element): string | null {
+  private getDirectTextContent(element: Element, whiteSpace: string): string | null {
     let text = '';
     for (let i = 0; i < element.childNodes.length; i++) {
       const child = element.childNodes[i];
       if (child.nodeType === Node.TEXT_NODE) {
         text += child.textContent || '';
       }
+    }
+    // Preserve leading whitespace for pre-formatted text (positioning-significant)
+    if (whiteSpace === 'pre' || whiteSpace === 'pre-wrap') {
+      return text.length > 0 ? text : null;
     }
     const trimmed = text.trim();
     return trimmed.length > 0 ? trimmed : null;
@@ -184,6 +195,7 @@ export class DomWalker {
       borderRightColor: style.borderRightColor,
       borderBottomColor: style.borderBottomColor,
       borderLeftColor: style.borderLeftColor,
+      flexDirection: style.flexDirection,
       cursor: style.cursor,
       whiteSpace: style.whiteSpace,
       textOverflow: style.textOverflow,

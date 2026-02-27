@@ -22,6 +22,7 @@ import { EventManager } from './events/EventManager.js';
 import { SelectionManager } from './events/SelectionManager.js';
 import { TextInputHandler } from './events/TextInputHandler.js';
 import { TextExporter } from './export/TextExporter.js';
+import { preprocessMermaid } from './mermaid/index.js';
 
 type EventCallback = (event: AsciiEvent) => void;
 
@@ -311,12 +312,12 @@ export class AsciiRenderer {
 
   /** Set HTML content to render */
   setContent(html: string): void {
-    this.currentHtml = html;
+    this.currentHtml = preprocessMermaid(html);
     this.scrollY = 0;
     this.lastRenderScrollY = 0;
     const pixelWidth = this.layoutEngine.getPixelWidth(this.cols);
     const pixelHeight = this.layoutEngine.getPixelHeight(this.rows);
-    this.layoutEngine.setContent(html, pixelWidth, pixelHeight);
+    this.layoutEngine.setContent(this.currentHtml, pixelWidth, pixelHeight);
 
     this.setupMutationObserver();
     this.renderFrame();

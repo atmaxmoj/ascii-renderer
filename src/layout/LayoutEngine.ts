@@ -83,6 +83,7 @@ export class LayoutEngine {
       }
       select {
         min-width: 14ch;
+        height: 1lh;
         padding: 0 1ch;
         padding-right: 3ch;
       }
