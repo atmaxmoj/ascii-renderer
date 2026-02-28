@@ -220,6 +220,45 @@
     // Wait for JetBrains Mono to load before measuring character cells
     await document.fonts.ready;
 
+    // ——— QR Code helper ———
+
+    var qrMatrix = [
+      [1,1,1,1,1,1,1,0,1,1,0,1,1,0,1,1,1,1,1,1,1],
+      [1,0,0,0,0,0,1,0,0,1,0,0,1,0,1,0,0,0,0,0,1],
+      [1,0,1,1,1,0,1,0,0,0,1,0,0,0,1,0,1,1,1,0,1],
+      [1,0,1,1,1,0,1,0,0,1,1,1,0,0,1,0,1,1,1,0,1],
+      [1,0,1,1,1,0,1,0,1,0,0,1,0,0,1,0,1,1,1,0,1],
+      [1,0,0,0,0,0,1,0,0,0,1,0,1,0,1,0,0,0,0,0,1],
+      [1,1,1,1,1,1,1,0,1,0,1,0,1,0,1,1,1,1,1,1,1],
+      [0,0,0,0,0,0,0,0,1,1,0,0,1,0,0,0,0,0,0,0,0],
+      [1,0,1,1,0,0,1,1,1,0,1,1,0,1,0,0,1,0,0,1,0],
+      [0,1,0,0,1,0,0,1,0,0,0,1,0,0,1,0,0,1,1,0,1],
+      [1,1,0,1,1,1,1,0,1,1,1,0,1,0,0,1,1,0,1,0,0],
+      [0,0,1,0,0,1,0,0,0,1,0,1,1,1,0,0,0,1,0,1,1],
+      [0,1,1,0,1,0,1,0,1,0,0,0,1,0,1,1,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,1,0,1,0,1,0],
+      [1,1,1,1,1,1,1,0,0,0,1,0,1,0,0,1,1,1,1,0,0],
+      [1,0,0,0,0,0,1,0,0,1,0,1,1,1,0,0,0,0,0,1,1],
+      [1,0,1,1,1,0,1,0,1,1,1,0,1,0,0,0,1,0,1,0,0],
+      [1,0,1,1,1,0,1,0,0,0,0,0,0,0,1,1,1,0,0,0,1],
+      [1,0,1,1,1,0,1,0,1,0,0,1,1,0,0,1,1,0,1,0,0],
+      [1,0,0,0,0,0,1,0,0,1,0,0,1,1,0,0,0,1,0,1,1],
+      [1,1,1,1,1,1,1,0,0,1,0,1,0,0,0,1,1,1,1,0,0],
+    ];
+
+    function qrToHtml(matrix) {
+      var lines = matrix.map(function(row) {
+        return row.map(function(cell) { return cell ? '\u2588\u2588' : '  '; }).join('');
+      });
+      return '<div style="white-space:pre; line-height:1; color:#000; background:#fff; display:table; margin:0 auto; padding:2ch;">'
+        + lines.join('\n') + '</div>';
+    }
+
+    var qrHtml = '<div style="padding:8px; text-align:center;">'
+      + '<p style="color:#8b949e; margin-bottom:8px;">Encoded: "Hi"</p>'
+      + qrToHtml(qrMatrix)
+      + '</div>';
+
     // ——— Example catalog ———
 
     var examples = [
@@ -330,6 +369,12 @@
         title: 'Combined Form',
         cols: 60, rows: 20,
         html: '<div style="border: 1px solid #666; padding: 8px; margin: 4px;">\n  <h2 style="font-size: 14px; font-weight: bold; margin: 2px 0;">Contact Us</h2>\n  <div style="margin: 4px 0;"><label>Name: </label><input type="text" value="" style="width: 200px;"></div>\n  <div style="margin: 4px 0;"><label>Email: </label><input type="text" value="" style="width: 200px;"></div>\n  <div style="margin: 4px 0;"><textarea rows="3" cols="35" style="width: 280px;">Your message...</textarea></div>\n  <div style="margin: 4px 0;"><input type="checkbox"> Subscribe to newsletter</div>\n  <div style="margin: 8px 0;">\n    <button>Send</button>\n    <button>Clear</button>\n  </div>\n</div>'
+      },
+      {
+        id: 'qr-code',
+        title: 'QR Code',
+        cols: 60, rows: 28,
+        html: qrHtml
       },
       {
         id: 'escape-overlay',
