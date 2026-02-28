@@ -40,7 +40,7 @@ const install = `
   ${codeBlock(`<script type="importmap">
 {
   "imports": {
-    "ascii-renderer": "https://unpkg.com/ascii-renderer@0.1.0/dist/ascii-renderer.js"
+    "ascii-renderer": "https://unpkg.com/ascii-renderer@latest/dist/ascii-renderer.js"
   }
 }
 </script>
