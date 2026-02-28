@@ -1,5 +1,37 @@
 import { heading, comparison } from '../utils.js';
 
+// ——— QR Code matrix (Version 1, 21x21, encodes "Hi") ———
+const qrMatrix = [
+  [1,1,1,1,1,1,1,0,1,1,0,1,1,0,1,1,1,1,1,1,1],
+  [1,0,0,0,0,0,1,0,0,1,0,0,1,0,1,0,0,0,0,0,1],
+  [1,0,1,1,1,0,1,0,0,0,1,0,0,0,1,0,1,1,1,0,1],
+  [1,0,1,1,1,0,1,0,0,1,1,1,0,0,1,0,1,1,1,0,1],
+  [1,0,1,1,1,0,1,0,1,0,0,1,0,0,1,0,1,1,1,0,1],
+  [1,0,0,0,0,0,1,0,0,0,1,0,1,0,1,0,0,0,0,0,1],
+  [1,1,1,1,1,1,1,0,1,0,1,0,1,0,1,1,1,1,1,1,1],
+  [0,0,0,0,0,0,0,0,1,1,0,0,1,0,0,0,0,0,0,0,0],
+  [1,0,1,1,0,0,1,1,1,0,1,1,0,1,0,0,1,0,0,1,0],
+  [0,1,0,0,1,0,0,1,0,0,0,1,0,0,1,0,0,1,1,0,1],
+  [1,1,0,1,1,1,1,0,1,1,1,0,1,0,0,1,1,0,1,0,0],
+  [0,0,1,0,0,1,0,0,0,1,0,1,1,1,0,0,0,1,0,1,1],
+  [0,1,1,0,1,0,1,0,1,0,0,0,1,0,1,1,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,1,0,1,0,1,0],
+  [1,1,1,1,1,1,1,0,0,0,1,0,1,0,0,1,1,1,1,0,0],
+  [1,0,0,0,0,0,1,0,0,1,0,1,1,1,0,0,0,0,0,1,1],
+  [1,0,1,1,1,0,1,0,1,1,1,0,1,0,0,0,1,0,1,0,0],
+  [1,0,1,1,1,0,1,0,0,0,0,0,0,0,1,1,1,0,0,0,1],
+  [1,0,1,1,1,0,1,0,1,0,0,1,1,0,0,1,1,0,1,0,0],
+  [1,0,0,0,0,0,1,0,0,1,0,0,1,1,0,0,0,1,0,1,1],
+  [1,1,1,1,1,1,1,0,0,1,0,1,0,0,0,1,1,1,1,0,0],
+];
+
+function qrToHtml(matrix) {
+  const lines = matrix.map(row =>
+    row.map(cell => cell ? '\u2588\u2588' : '  ').join('')
+  );
+  return `<div style="white-space:pre; line-height:1; color:#000; background:#fff; display:table; margin:0 auto; padding:2ch;">${lines.join('\n')}</div>`;
+}
+
 const items = [
   {
     id: 'sec-ex-headings',
@@ -178,6 +210,14 @@ const items = [
   <div style="margin:4px 0;"><textarea rows="2" cols="30" style="width:220px;">Your message...</textarea></div>
   <div style="margin:4px 0;"><input type="checkbox"> Subscribe to newsletter</div>
   <div style="margin:4px 0;"><button>Send</button> <button>Clear</button></div>
+</div>`,
+  },
+  {
+    id: 'sec-ex-qrcode',
+    title: 'QR Code',
+    html: `<div style="padding:4px; text-align:center;">
+  <p style="color:#8b949e; margin-bottom:4px;">Encoded: "Hi"</p>
+  ${qrToHtml(qrMatrix)}
 </div>`,
   },
   {

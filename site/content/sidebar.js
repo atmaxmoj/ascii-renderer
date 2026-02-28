@@ -38,6 +38,7 @@ const navItems = [
     { target: 'sec-ex-textarea', label: 'Textarea' },
     { target: 'sec-ex-cjk', label: 'CJK Text' },
     { target: 'sec-ex-form', label: 'Combined Form' },
+    { target: 'sec-ex-qrcode', label: 'QR Code' },
     { target: 'sec-ex-escape', label: 'Escape Overlay' },
   ]},
 ];
@@ -46,7 +47,7 @@ export function buildSidebar(activeTarget) {
   let html = `
     <div style="padding:8px;">
       <div style="font-weight:bold; color:#f0f6fc;">>&lowbar; ascii-renderer</div>
-      <div style="color:#484f58; margin-bottom:8px;">v0.1.2</div>`;
+      <div style="color:#484f58; margin-bottom:8px;">v0.2.0</div>`;
 
   for (const group of navItems) {
     html += `
